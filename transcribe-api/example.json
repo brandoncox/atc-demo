@@ -1,0 +1,121 @@
+{
+  "shift_id": "shift_20250624_0800",
+  "controller_id": "CTR_823",
+  "facility": "blowntiresLSZH1",
+  "status": "completed|processing|queued",
+  "start_time": "2025-06-24T08:00:00Z",
+  "end_time": "2025-06-24T16:00:00Z",
+  "position": "Twr",
+  "schedule_type": "2-2-1",
+  "traffic_count_avg": 15,
+  "original_file": "blowntiresLSZH1-Twr-Jun-24-2025-0800Z.mp3",
+  "transcription": "United one two, one two three, three three eight, north runway one six, exit for takeoff. So I lost the five footballs, what's your two-way through this? What was the five footballs that attacked the Georgia Dicrot, no me two eight, on the day from one to one, there's no seven, five, five, five, five, five, five, five, five, five, five, five, five, five, five, five, five, five, five, four, five, five, five, five, five, five, four, two, three, the Dicrot, how we're through behind, they've all taken runway nine, I've remained two eight, anyway behind, then the ball goes around line up to it, right there, it's just three takes, that's the exit, good to see the exit departure in around six minutes. Get out of one two, it's a good to take off runway one six. Stand up on two, Roger. Sit in power, also, but I will fill the mic, and you'll know. Stand up, Mike. Sit in power, also, power, still, the mic, enough. Got the round of luck, me, that's the power, stay outside, as each our emergency program. Roger. I get out one six, there's a really other runway right now, step by. Now, there won't be a Roger Rescue Services on the way. And I want to. And, Tari, and I'd want to, we're able to clear the runway, but we would like to go and hold somewhere to run our checklist. I either want to or just not pressure. Okay. And I did want to, uh, confirmation hold position, rescue services are underway now. Okay, I hope it's a unit I want to. United one, uh, to confirm a normal operation. Okay, you know, I want to, I think it just, uh, put a emergency crew to check breaks just to make sure there's no fire. Otherwise, we are not all operations. I want to get a one two, something. United one, two, uh, shut down both engines and report one that's, uh, completed. I get one, two, uh, would you like it to clear the runway before setting down the runway? Uh, the, uh, engine. And make it if you know, I don't want to hold position and shut down engines now, and then, uh, report when that's, uh, completed. Okay, we are certainly at the end. We will shut down, uh, momentarily. One, two. Thank you. And for one spot four, whole position is going to be, uh, under the air, call your back, I can't remember that from where you're from. And for five, should I mark the whole position on the runway is going to be a couple of minutes of delay. The position of three spot four. I tell you, United one, two engines are shut down. United one, two. Thank you. United one, two. United one, two. Go ahead. Now, for information, the fibergate is at cooling the brakes at the moment. Okay, thank you, sir. Swiss Dream Delta X-ray went 240 degrees, seven knots from a two-eighths to clear the takeoff. So, let's, let's take off this three-delted axis. United one, two. United one, two. Go ahead. So, the fire services just informed me that, uh, you are going to have to, with the subbarca on the runway. Okay, is there a reason why? United one, two, the safety of the aircraft is good, but the high temperature uses our, uh, not good anymore. Okay, are they able to tell us clear the runway, uh, while the brake is cool? I'm, uh, sent by short. So, in United one, two, there's a three-tie that I have been flated. Okay, thank you. I'm going to explain eight, actually, my wing 240 degrees eight knots from a two-eighths, a particular. We're going to go from a twid, I said, that's a failure. And the United one, two, just to confirm as well that fibergate informed me that the situation is under control, but that you will have to do it in later on, get after only here. Okay, say again, three-night one, two. I just informed the fibergate informed us that the situation is under control, but then later on, you will have to, uh, get the passengers off here. Okay, yes. Can we set the parking brake, and, uh, we will get ready for, um, the department. United one, two AFR, we can set the parking brake, I call it back, that's sort of, uh, for an information. Okay, United one, two parking brake, that I will stand by, uh, for, for further. United one, two, just for your information, I just spoke to, to your responsible incident manager. There are three out of four tires of flat current, two, they expect some number four tires as well as two become flat soon. The situation is under control, aircraft is safe according to fibergate, and we are now organizing a passenger and normal passenger disembarkation on the runway. So, just stand by here, and, uh, we are organizing everything around it. aircraft is safe, and, uh, fibergate is safe in the situation under control. Okay, United one, two. We understand three out of four flats, uh, plus we are not, uh, aircraft is safe and under control passenger. So, in the normal, we will, uh, be playing on the runway, and we, uh, will wait for your further information. Correct, ground timing will be organized for you on the runway, just keep it in, uh, five to ten minutes time to organize everything, but everything is on the control time for cooperation. Okay, five to ten minutes, sounds good, thank you, United one, two.",
+  "language": "en",
+  "segments": [
+    {
+      "id": 0,
+      "start": 0.0,
+      "end": 4.24,
+      "speaker": "controller",
+      "text": "United one two, one two three, three three eight, north runway one six,"
+    },
+    {
+      "id": 1,
+      "start": 4.24,
+      "end": 5.24,
+      "speaker": "controller",
+      "text": "exit for takeoff."
+    },
+    {
+      "id": 2,
+      "start": 5.24,
+      "end": 11.72,
+      "speaker": "pilot",
+      "text": "So I lost the five footballs, what's your two-way through this?"
+    },
+    {
+      "id": 3,
+      "start": 11.72,
+      "end": 14.120000000000001,
+      "speaker": "pilot", 
+      "text": "What was the five footballs that attacked the Georgia Dicrot,"
+    },
+    {
+      "id": 4,
+      "start": 14.120000000000001,
+      "end": 16.76,
+      "speaker": "controller",
+      "text": "no me two eight, on the day from one to one, there's no seven, five, five,"
+    },
+    {
+      "id": 5,
+      "start": 16.76,
+      "end": 20.56,
+      "speaker": "controller",
+      "text": "five, five, five, five, five, five, five, five, five, five, five, five,"
+    },
+    {
+      "id": 6,
+      "start": 20.56,
+      "end": 23.2,
+      "speaker": "controller",
+      "text": "five, five, five, five, four, five, five, five, five, five, five,"
+    },
+    {
+      "id": 7,
+      "start": 23.2,
+      "end": 25.36,
+      "speaker": "pilot",
+      "text": "four, two, three, the Dicrot, how we're through behind,"
+    },
+    {
+      "id": 8,
+      "start": 25.36,
+      "end": 27.2,
+      "speaker": "pilot",
+      "text": "they've all taken runway nine, I've remained two eight,"
+    },
+    {
+      "id": 9,
+      "start": 27.2,
+      "end": 30.24,
+      "speaker": "pilot",
+      "text": "anyway behind, then the ball goes around line up to it,"
+    },
+    {
+      "id": 10,
+      "start": 30.24,
+      "end": 31.68,
+      "speaker": "pilot",
+      "text": "right there, it's just three takes,"
+    },
+    {
+      "id": 11,
+      "start": 31.68,
+      "end": 36.68,
+      "speaker": "controller",
+      "text": "that's the exit, good to see the exit departure in around six minutes."
+    },
+    {
+      "id": 12,
+      "start": 41.28,
+      "end": 45.56,
+      "speaker": "controller",
+      "text": "Get out of one two, it's a good to take off runway one six."
+    },
+    {
+      "id": 13,
+      "start": 45.56,
+      "end": 46.56,
+      "speaker": "pilot",
+      "text": "Stand up on two, Roger."
+    },
+    {
+      "id": 14,
+      "start": 51.0,
+      "end": 52.760000000000005,
+      "speaker": "pilot", 
+      "text": "Sit in power, also, but I will fill the mic,"
+    }
+  ]
+}

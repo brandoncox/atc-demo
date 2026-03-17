@@ -1,0 +1,35 @@
+# Attach model to vllm server. This is an NVIDIA template
+# Save as: inferenceservice.yaml
+apiVersion: serving.kserve.io/v1beta1
+kind: InferenceService
+metadata:
+  annotations:
+    openshift.io/display-name: whisper-large-v3-turbo-quantized
+    serving.kserve.io/deploymentMode: RawDeployment
+  name: whisper-large-v3-turbo-quantized
+  labels:
+    opendatahub.io/dashboard: 'true'
+spec:
+  predictor:
+    maxReplicas: 1
+    minReplicas: 1
+    model:
+      modelFormat:
+        name: vLLM
+      name: ''
+      resources:
+        limits:
+          cpu: '2'			# this is model specific
+          memory: 8Gi		# this is model specific
+          nvidia.com/gpu: '1'	# this is accelerator specific
+        requests:			# same comment for this block
+          cpu: '1'
+          memory: 4Gi
+          nvidia.com/gpu: '1'
+      runtime: vllm-cuda-runtime	# must match the ServingRuntime name above
+      storageUri: oci://registry.redhat.io/rhelai1/modelcar-whisper-large-v3-turbo-quantized-w4a16:1.5
+    tolerations:
+    - effect: NoSchedule
+      key: nvidia.com/gpu
+      operator: Exists
+

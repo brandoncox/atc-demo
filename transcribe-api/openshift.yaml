@@ -1,0 +1,77 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: transcribe-api
+  labels:
+    app: transcribe-api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: transcribe-api
+  template:
+    metadata:
+      labels:
+        app: transcribe-api
+    spec:
+      containers:
+        - name: transcribe-api
+          image: transcribe-api:latest
+          ports:
+            - containerPort: 8080
+          env:
+            - name: WHISPER_BASE_URL
+              value: "http://localhost:11434/v1"   # override with your remote URL
+            - name: WHISPER_MODEL
+              value: "whisper-large-v3-turbo-quantized"
+            # Uncomment and populate if your endpoint requires an API key:
+            # - name: WHISPER_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: whisper-secret
+            #       key: api-key
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: transcribe-api
+spec:
+  selector:
+    app: transcribe-api
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: transcribe-api
+spec:
+  to:
+    kind: Service
+    name: transcribe-api
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect
