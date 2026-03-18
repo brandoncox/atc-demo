@@ -8,7 +8,7 @@ from openai import OpenAI, APIConnectionError, APIStatusError
 from pymongo.errors import PyMongoError
 
 WHISPER_BASE_URL = os.getenv("WHISPER_BASE_URL", "http://localhost:11434/v1")
-WHISPER_MODEL = os.getenv("WHISPER_MODEL", "whisper")
+WHISPER_MODEL = os.getenv("WHISPER_MODEL", "whisper-large-v3-turbo-quantized")
 WHISPER_API_KEY = os.getenv("WHISPER_API_KEY", "ollama")
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 
@@ -39,7 +39,9 @@ async def transcribe(
     traffic_count_avg: Optional[int] = Form(None),
     original_file: Optional[str] = Form(None),
 ):
+    print(f"Additional metadata: shift_id={shift_id}, controller_id={controller_id}, facility={facility}, status={status}, start_time={start_time}, end_time={end_time}, position={position}, schedule_type={schedule_type}, traffic_count_avg={traffic_count_avg}, original_file={original_file}")   
     content = await file.read()
+
     if not content:
         raise HTTPException(status_code=400, detail="Uploaded file is empty")
 
@@ -55,6 +57,7 @@ async def transcribe(
     if prompt:
         kwargs["prompt"] = prompt
 
+    print (f"Sending transcription request to Whisper model '{WHISPER_MODEL}' with file '{file.filename}'...")
     try:
         result = client.audio.transcriptions.create(**kwargs)
         
@@ -79,36 +82,38 @@ async def transcribe(
         "language": getattr(result, "language", None),
         "transcription": result.text,
         "segments": [],
+        "analysis": "",
         "created_at": datetime.now(timezone.utc),
     }
-
+    print(doc)
     try:
-        insert_result = await db["transcriptions"].insert_one(doc)
+        print("Saving transcription result to MongoDB...")
+        insert_result = await db["shift"].insert_one(doc)
+        print( f"Document inserted with ID: {insert_result.inserted_id}")
     except PyMongoError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to save transcription: {e}")
-
+        raise HTTPException(status_code=500, detail=f"Failed to save shift: {e}")
     return {**doc, "_id": str(insert_result.inserted_id), "created_at": doc["created_at"].isoformat()}
 
-@app.get("/transcription/{shift_id}")
-async def get_transcription(shift_id: str):
+@app.get("/shift/{shift_id}")
+async def get_shift(shift_id: str):
     try:
-        doc = await db["transcriptions"].find_one({"shift_id": shift_id})
+        doc = await db["shift"].find_one({"shift_id": shift_id})
         if not doc:
-            raise HTTPException(status_code=404, detail="Transcription not found")
+            raise HTTPException(status_code=404, detail="Shift not found")
         doc["_id"] = str(doc["_id"])
         doc["created_at"] = doc["created_at"].isoformat()
         return doc
     except PyMongoError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to retrieve transcription: {e}")       
+        raise HTTPException(status_code=500, detail=f"Failed to retrieve Shift: {e}")       
     
 
-@app.delete("/transcription/{shift_id}")
-async def delete_transcription(shift_id: str):
+@app.delete("/shift/{shift_id}")
+async def delete_shift(shift_id: str):
     try:
-        result = await db["transcriptions"].delete_one({"shift_id": shift_id})
+        result = await db["shift"].delete_one({"shift_id": shift_id})
         if result.deleted_count == 0:
-            raise HTTPException(status_code=404, detail="Transcription not found")
-        return {"detail": "Transcription deleted"}
+            raise HTTPException(status_code=404, detail="Shift not found")
+        return {"detail": "Shift deleted"}
     except PyMongoError as e:
-        raise HTTPException(status_code=500, detail=f"Failed to delete transcription: {e}") 
+        raise HTTPException(status_code=500, detail=f"Failed to delete shift: {e}") 
     
