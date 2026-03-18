@@ -22,6 +22,7 @@ DEFAULT_QUERY_TEMPLATE = (
     "Transcript:\n{transcription}"
 )
 
+client = LlamaStackClient(base_url=LLAMA_STACK_URL)
 app = FastAPI(title="Shift Analysis API", version="1.0.0")
 
 
@@ -58,19 +59,8 @@ def ingest_urls(client: LlamaStackClient, urls: list[str]) -> str:
     """Download FAA AIM pages, upload to Llama Stack, and return a vector store ID."""
     print("Ingesting FAA AIM documents...")
     documents = []
-
-    # for url in urls:
-    #     filename = url.split("/")[-1]
-    #     resp = requests.get(url, timeout=30)
-    #     resp.raise_for_status()
-    #     file_obj = client.files.create(
-    #         file=(filename, resp.content, "text/html"),
-    #         purpose="assistants",
-    #     )
-    #     file_ids.append(file_obj.id)
-
     vector_db_id = f"aim_docs_{uuid.uuid4()}"
-    print(f"Registering vector database '{vector_db_id}' with Llama Stack...")
+    
     client.vector_dbs.register(
         vector_db_id=vector_db_id,
         embedding_model="all-MiniLM-L6-v2",
@@ -87,7 +77,6 @@ def ingest_urls(client: LlamaStackClient, urls: list[str]) -> str:
         )
         for i, (url, url_type) in enumerate(FAA_AIM_URLS)
     ]
-    print(documents)
     print(f"Inserting documents into vector database '{vector_db_id}'...")
     client.tool_runtime.rag_tool.insert(
         documents=documents,
@@ -110,7 +99,7 @@ def run_rag_query(client: LlamaStackClient, model: str, vector_store_id: str, qu
         model=model,
         instructions=(
             "You are an expert air traffic control supervisor. Use the file search tool to reference FAA AIM procedures when analyzing transcripts." \
-            "return the top 3 most relevant AIM sections that apply to the question, and quote specific language from the AIM in your answer. " \
+            "return the top 3 most relevant AIM sections that apply to the question, and quote specific language from the AIM in your answer." \
         ),
         sampling_params={"max_tokens": 13000},
         tools=[
@@ -146,20 +135,7 @@ def run_rag_query(client: LlamaStackClient, model: str, vector_store_id: str, qu
 
 @app.post("/analyze_transcript", response_model=AnalysisResponse)
 async def analyze_transcript(req: TranscriptRequest):
-    client = LlamaStackClient(base_url=LLAMA_STACK_URL)
-
-    print(client)
-
-    try:
-        model = build_llm_model(client)
-    except Exception as e:
-        raise HTTPException(status_code=503, detail=f"Failed to connect to Llama Stack: {e}")
-
-    try:
-        vector_store_id = ingest_urls(client, FAA_AIM_URLS)
-    except Exception as e:
-        raise HTTPException(status_code=502, detail=f"Failed to ingest FAA documents: {e}")
-
+    
     query = req.query or DEFAULT_QUERY_TEMPLATE.format(transcription=req.transcription)
 
     try:
@@ -177,3 +153,14 @@ async def analyze_transcript(req: TranscriptRequest):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+try:
+    model = build_llm_model(client)
+except Exception as e:
+    raise HTTPException(status_code=503, detail=f"Failed to connect to Llama Stack: {e}")
+
+try:
+    vector_store_id = ingest_urls(client, FAA_AIM_URLS)
+except Exception as e:
+    raise HTTPException(status_code=502, detail=f"Failed to ingest FAA documents: {e}")
+
