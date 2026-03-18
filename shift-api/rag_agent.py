@@ -65,12 +65,14 @@ print("\nCreating RAG agent...")
 rag_agent = Agent(
     client,
     model=model,
-    instructions="You are a helpful assistant. Use the file search tool to answer questions as needed.",
+    instructions="You are a helpful assistant. You must use the tool to answer questions as needed.",
     tools=[
-        {
-            "type": "file_search",
-            "vector_store_ids": [vector_db_id],
-        }
+        dict(
+            name="builtin::rag",
+            args={
+                "vector_db_ids": [vector_db_id],  # list of IDs of document collections to consider during retrieval
+            },
+        )
     ],
 )
 
