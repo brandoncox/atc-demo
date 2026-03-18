@@ -121,16 +121,8 @@ def run_rag_query(client: LlamaStackClient, model: str, vector_store_id: str, qu
     print("RAG query executed, processing response...")
     print(response.output_message.content)
     print("Extracting response text from agent events...")
-    chunks = []
-    for event in AgentEventLogger().log(response):
-        if hasattr(event, "text"):
-            chunks.append(event.text)
-        elif isinstance(event, str):
-            chunks.append(event)
-
-    print("RAG query completed.")
-    print(f"Full response:\n{''.join(chunks)}")
-    return "".join(chunks).strip()
+    
+    return response.output_message.content
 
 
 @app.post("/analyze_transcript", response_model=AnalysisResponse)
