@@ -1,0 +1,66 @@
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: atc-web-ui
+  labels:
+    app: atc-web-ui
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: atc-web-ui
+  template:
+    metadata:
+      labels:
+        app: atc-web-ui
+    spec:
+      containers:
+        - name: atc-web-ui
+          image: atc-web-ui:latest
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          resources:
+            requests:
+              cpu: "50m"
+              memory: "64Mi"
+            limits:
+              cpu: "200m"
+              memory: "128Mi"
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: atc-web-ui
+spec:
+  selector:
+    app: atc-web-ui
+  ports:
+    - port: 80
+      targetPort: 8080
+---
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: atc-web-ui
+spec:
+  to:
+    kind: Service
+    name: atc-web-ui
+  port:
+    targetPort: 8080
+  tls:
+    termination: edge
+    insecureEdgeTerminationPolicy: Redirect

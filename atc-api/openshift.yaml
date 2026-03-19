@@ -2,27 +2,39 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: shift-api
+  name: atc-api
   labels:
-    app: shift-api
+    app: atc-api
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app: shift-api
+      app: atc-api
   template:
     metadata:
       labels:
-        app: shift-api
+        app: atc-api
     spec:
       containers:
-        - name: shift-api
-          image: shift-api:latest
+        - name: atc-api
+          image: atc-api:latest
           ports:
             - containerPort: 8080
           env:
             - name: LLAMA_STACK_URL
               value: "http://localhost:8321"   # override with your remote URL
+            - name: WHISPER_BASE_URL
+              value: "http://localhost:11434/v1"   # override with your remote URL
+            - name: WHISPER_MODEL
+              value: "whisper-large-v3-turbo-quantized"
+            - name: MONGO_URI
+              value: "mongodb://mongodb:27017"
+            # Uncomment and populate if your Whisper endpoint requires an API key:
+            # - name: WHISPER_API_KEY
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: whisper-secret
+            #       key: api-key
           livenessProbe:
             httpGet:
               path: /health
@@ -46,10 +58,10 @@ spec:
 apiVersion: v1
 kind: Service
 metadata:
-  name: shift-api
+  name: atc-api
 spec:
   selector:
-    app: shift-api
+    app: atc-api
   ports:
     - port: 80
       targetPort: 8080
@@ -57,11 +69,11 @@ spec:
 apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
-  name: shift-api
+  name: atc-api
 spec:
   to:
     kind: Service
-    name: shift-api
+    name: atc-api
   port:
     targetPort: 8080
   tls:

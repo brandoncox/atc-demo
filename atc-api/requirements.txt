@@ -3,3 +3,6 @@ uvicorn[standard]==0.34.0
 llama-stack-client==0.2.7
 requests>=2.32.0
 pydantic>=2.0.0
+openai==1.65.4
+python-multipart==0.0.20
+motor==3.7.0
