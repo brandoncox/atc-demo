@@ -1,4 +1,5 @@
 import os
+from unittest import result
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
@@ -20,6 +21,7 @@ LLAMA_STACK_URL = os.getenv("LLAMA_STACK_URL", "http://localhost:8321")
 WHISPER_BASE_URL = os.getenv("WHISPER_BASE_URL", "http://localhost:11434/v1")
 WHISPER_MODEL = os.getenv("WHISPER_MODEL", "whisper-large-v3-turbo-quantized")
 WHISPER_API_KEY = os.getenv("WHISPER_API_KEY", "ollama")
+GRANITE_BASE_URL=os.getenv("GRANITE_BASE_URL", "http://localhost:11434/v1")
 MONGO_URI = os.getenv("MONGO_URI", "mongodb://localhost:27017")
 
 FAA_AIM_URLS = [
@@ -195,6 +197,7 @@ async def transcribe(
     traffic_count_avg: Optional[int] = Form(None),
     original_file: Optional[str] = Form(None),
 ):
+    print("inside of transcribe endpoint")
     print(f"Additional metadata: shift_id={shift_id}, controller_id={controller_id}, facility={facility}, status={status}, start_time={start_time}, end_time={end_time}, position={position}, schedule_type={schedule_type}, traffic_count_avg={traffic_count_avg}, original_file={original_file}")
     content = await file.read()
 
@@ -216,7 +219,20 @@ async def transcribe(
     print(f"Sending transcription request to Whisper model '{WHISPER_MODEL}' with file '{file.filename}'...")
     try:
         result = whisper_client.audio.transcriptions.create(**kwargs)
+        granite_client = OpenAI(
+            base_url=GRANITE_BASE_URL,
+            api_key="YOUR_TOKEN"  # often a bearer token from OpenShift
+        )
 
+        response = granite_client.chat.completions.create(
+            model="granite32-8b",
+            messages=[{
+                "role": "user",
+                "content": f"Format the transcript between a Pilot and Control Tower indicating who said what. Do not exclude text, but indicate if it is difficult to understand. Example:\nPilot: getting ready for takeoff\nController: sounds good let us know what happens.\n\nTranscript:\n\n{result.text}"
+            }],
+            temperature=0.3
+        )
+        result.text = response.choices[0].message.content
     except APIStatusError as e:
         raise HTTPException(status_code=e.status_code, detail=e.message)
 
