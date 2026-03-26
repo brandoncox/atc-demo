@@ -1,4 +1,5 @@
 import os
+import re
 from unittest import result
 import uuid
 from datetime import datetime, timezone
@@ -80,10 +81,18 @@ class AnalysisResponse(BaseModel):
     vector_store_id: str
     analysis: str
 
-
 # ---------------------------------------------------------------------------
 # RAG helpers
 # ---------------------------------------------------------------------------
+
+def clean_text(text):
+    # remove repeated words (basic)
+    text = re.sub(r'\b(\w+)( \1\b)+', r'\1', text)
+    
+    # remove weird numeric spam
+    text = re.sub(r'(\d+\.){2,}', '', text)
+    
+    return text
 
 
 def build_llm_model(client: LlamaStackClient) -> str:
@@ -211,10 +220,6 @@ async def transcribe(
         "prompt": "Separate text into segments",
         "timestamp_granularities": "segment",
     }
-    if language:
-        kwargs["language"] = language
-    if prompt:
-        kwargs["prompt"] = prompt
 
     print(f"Sending transcription request to Whisper model '{WHISPER_MODEL}' with file '{file.filename}'...")
     try:
@@ -223,12 +228,56 @@ async def transcribe(
             base_url=GRANITE_BASE_URL,
             api_key="YOUR_TOKEN"  # often a bearer token from OpenShift
         )
+        clean_result = clean_text(result.text)
+        prompt = f"""
+        You are an expert in air traffic control (ATC) communications and noisy transcript reconstruction.
+
+        Your task is to transform a messy, error-filled transcript into a clean, readable conversation between a Pilot and an Air Traffic Controller.
+
+        CRITICAL RULES:
+        - The input contains transcription errors, repetition, and noise. You MUST clean it aggressively.
+        - Remove repeated phrases, duplicate words, and obvious transcription artifacts.
+        - Ignore nonsensical fragments (e.g., repeated callsigns, numbers, partial words like "Flattus 5 Flattus 5 Flattus 5").
+        - Reconstruct broken sentences into clear, natural aviation communication.
+        - You MAY fix obvious transcription mistakes using context (e.g., "Romyocera" → "Romeo Sierra").
+        - Split unrelated conversations into separate exchanges if needed, but keep a single continuous output.
+
+        SPEAKER IDENTIFICATION:
+        - Controller:
+        - Gives instructions (clear to land, hold short, taxi)
+        - Asks status or provides assistance
+        - Pilot:
+        - Reports position, issues, or acknowledges instructions
+
+        FORMATTING RULES:
+        - ONLY use:
+        Pilot:
+        Controller:
+        - Alternate speakers naturally based on conversation flow
+        - Merge consecutive lines from the same speaker into one clean sentence
+        - Keep each line concise and meaningful
+
+        DO NOT:
+        - Include repeated spam phrases
+        - Include broken or partial words
+        - Output raw or uncleaned text
+        - Explain anything
+
+        OUTPUT FORMAT (STRICT):
+        Pilot: <clean sentence>
+        Controller: <clean sentence>
+
+        ---
+
+        Transcript:
+        {clean_result}
+        """
 
         response = granite_client.chat.completions.create(
             model="granite32-8b",
             messages=[{
                 "role": "user",
-                "content": f"Format the transcript between a Pilot and Control Tower indicating who said what. Do not exclude text, but indicate if it is difficult to understand. Example:\nPilot: getting ready for takeoff\nController: sounds good let us know what happens.\n\nTranscript:\n\n{result.text}"
+                "content": prompt
             }],
             temperature=0.3
         )
@@ -293,10 +342,7 @@ async def delete_shift(shift_id: str):
     except PyMongoError as e:
         raise HTTPException(status_code=500, detail=f"Failed to delete shift: {e}")
 
-#write the function/get
-#  to get all shift objects from the database and return them as a list. Make the fuction paginated, accepting `page` and `page_size` query parameters to control the number of results returned per page. The function should return a JSON response containing the list of shift objects for the requested page, along with metadata about the total number of shifts and total pages. Allow for sorting on the `created_at` field in either ascending or descending order, based on an optional `sort_order` query parameter that can be set to 'asc' or 'desc'. Add filtering capabilities to the function, allowing clients to filter shifts based on `facility` and `status` by accepting optional query parameters for these fields. The function should return only the shifts that match the specified filters.  
-# generate the sample curl command to test the endpoint with pagination, sorting, and filtering:
-# curl -X GET "http://localhost:8000/shifts?page=1&page_size=5&sort_order=asc&facility=JFK&status=analyzed" -H "accept: application/json"
+
 @app.get("/shifts")
 async def get_shifts(
     page: int = 1,
