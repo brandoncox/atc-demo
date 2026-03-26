@@ -12,7 +12,11 @@ Merged from `shift-api` and `transcribe-api`.
 
 ```
 atc-api/
-├── main.py           # FastAPI application — all app logic lives here
+├── main.py           # App factory — wires FastAPI, middleware, lifespan, and router
+├── config.py         # Env vars, constants (FAA URLs, query template), shared client instances
+├── models.py         # Pydantic request/response models
+├── rag.py            # RAG helpers: clean_text, build_llm_model, ingest_urls, run_rag_query
+├── routes.py         # APIRouter with all route handlers (/health, /transcribe, /shifts, /analyze_transcript)
 ├── requirements.txt  # Python dependencies
 ├── Dockerfile        # Container image; runs on port 8080 (OpenShift non-root convention)
 ├── openshift.yaml    # Deployment + Service + Route for OpenShift
@@ -20,8 +24,6 @@ atc-api/
 ```
 
 ## Key Design Decisions
-
-- **Single-file app** — `main.py` is intentionally kept as one file. Do not split into modules unless the file grows substantially.
 - **FAA AIM URLs are hardcoded** — the AIM chapter URLs are the canonical knowledge base. Add to the list if coverage needs to expand; do not make them a runtime parameter.
 - **Vector store at startup** — the vector store is created once at startup and reused across requests. This is faster than per-request ingestion.
 - **LlamaStack client** — uses `llama-stack-client` directly (not the OpenAI-compatible layer). The `LLAMA_STACK_URL` env var points at the server.
