@@ -29,6 +29,12 @@ spec:
               value: "whisper-large-v3-turbo-quantized"
             - name: MONGO_URI
               value: "mongodb://mongodb:27017"
+            - name: GRANITE_BASE_URL
+              value: "http://localhost:11434/v1"   # override with your remote URL
+            - name: SLACK_MCP_URL
+              value: "http://slack-mcp-server:80/sse"
+            - name: SAFETY_SCORE_THRESHOLD
+              value: "75"
             # Uncomment and populate if your Whisper endpoint requires an API key:
             # - name: WHISPER_API_KEY
             #   valueFrom:
@@ -70,6 +76,8 @@ apiVersion: route.openshift.io/v1
 kind: Route
 metadata:
   name: atc-api
+  annotations:
+    haproxy.router.openshift.io/timeout: 300s
 spec:
   to:
     kind: Service

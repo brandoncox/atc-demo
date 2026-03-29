@@ -40,6 +40,8 @@ atc-api/
 | `WHISPER_MODEL` | `whisper-large-v3-turbo-quantized` | Model name to request |
 | `WHISPER_API_KEY` | `ollama` | API key (Ollama ignores it) |
 | `MONGO_URI` | `mongodb://localhost:27017` | MongoDB connection string |
+| `SLACK_MCP_URL` | `http://slack-mcp-server:80/sse` | Slack MCP server SSE endpoint |
+| `SAFETY_SCORE_THRESHOLD` | `75` | Safety score (0-100) above which a Slack supervisor alert is sent |
 
 ## Running Locally
 

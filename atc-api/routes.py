@@ -1,3 +1,4 @@
+import asyncio
 import uuid
 from datetime import datetime, timezone
 from typing import Optional
@@ -73,7 +74,7 @@ async def transcribe(
 
     print(f"Sending transcription request to Whisper model '{WHISPER_MODEL}' with file '{file.filename}'...")
     try:
-        result = whisper_client.audio.transcriptions.create(**kwargs)
+        result = await asyncio.to_thread(whisper_client.audio.transcriptions.create, **kwargs)
 
         granite_client = OpenAI(base_url=GRANITE_BASE_URL, api_key="YOUR_TOKEN")
         clean_result = clean_text(result.text)
@@ -121,7 +122,8 @@ async def transcribe(
         {clean_result}
         """
 
-        response = granite_client.chat.completions.create(
+        response = await asyncio.to_thread(
+            granite_client.chat.completions.create,
             model="granite32-8b",
             messages=[{"role": "user", "content": granite_prompt}],
             temperature=0.3,
@@ -255,9 +257,14 @@ async def analyze_transcript(req: TranscriptRequest, request: Request):
 
     model = request.app.state.model
     vector_store_id = request.app.state.vector_store_id
+    if not model or not vector_store_id:
+        raise HTTPException(
+            status_code=503,
+            detail="RAG backend not initialized. Check LlamaStack and Milvus connectivity and restart the pod.",
+        )
 
     try:
-        analysis = run_rag_query(llama_client, model, vector_store_id, query)
+        analysis = await asyncio.to_thread(run_rag_query, llama_client, model, vector_store_id, query, shift_data=doc)
         doc_update = {"analysis": analysis, "status": "analyzed"}
         await db["shift"].update_one({"shift_id": req.shift_id}, {"$set": doc_update})
     except Exception as e:

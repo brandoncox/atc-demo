@@ -1,19 +1,27 @@
 import os
 
+import asyncio
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from config import db, llama_client, FAA_AIM_URLS
-from rag import build_llm_model, ingest_urls
+from rag import build_llm_model, ingest_urls, register_slack_mcp
 import routes
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     await db["shift"].create_index("shift_id", unique=True, sparse=True)
-    app.state.model = build_llm_model(llama_client)
-    app.state.vector_store_id = ingest_urls(llama_client, FAA_AIM_URLS)
+    try:
+        await asyncio.to_thread(register_slack_mcp, llama_client)
+        app.state.model = await asyncio.to_thread(build_llm_model, llama_client)
+        app.state.vector_store_id = await asyncio.to_thread(ingest_urls, llama_client, FAA_AIM_URLS)
+        print("RAG backend initialized successfully.")
+    except Exception as e:
+        print(f"WARNING: RAG initialization failed: {e}. /analyze_transcript will be unavailable until resolved.")
+        app.state.model = None
+        app.state.vector_store_id = None
     yield
 
 

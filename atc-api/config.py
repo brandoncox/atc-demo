@@ -19,8 +19,8 @@ FAA_AIM_URLS = [
 DEFAULT_QUERY_TEMPLATE = (
     "You are an air traffic control shift supervisor reviewing a controller's transcript. "
     "Analyze the following transcript for procedural compliance, communication quality, "
-    "and any deviations from FAA standard phraseology or procedures. "
-    "Provide a structured assessment with specific findings.\n\n"
+    "and any deviations from FAA standard phraseology or procedures using the knowledge search tool to answer user questions."
+    "Provide a structured assessment with specific findings and references. \n\n"
     "Transcript:\n{transcription}"
 )
 
