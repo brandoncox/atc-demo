@@ -131,15 +131,12 @@ def run_rag_query(
             "return the top 3 most relevant AIM sections that apply to the question, and quote specific language from the AIM in your answer."
         ),
         sampling_params={"max_tokens": 4096},
+        tool_config={"tool_choice":"auto"},
         tools=[
             dict(
                 name="builtin::rag",
                 args={"vector_db_ids": [vector_store_id]},
-            ),
-            dict(
-                name="mcp::slack",
-                args={"url": SLACK_MCP_URL},
-            ),
+            ),"mcp::slack",
         ],
     )
 
@@ -215,7 +212,7 @@ def run_rag_query(
     print("=== Turn 3: Slack Supervisor Alert ===")
     try:
         response3 = agent.create_turn(
-            messages=[{"role": "user", "content": slack_prompt}],
+            messages=[{"role": "user", "content": "Send a message with the summarization to the demos channel on Slack."}],
             session_id=session_id,
             stream=False,
         )
@@ -223,4 +220,4 @@ def run_rag_query(
     except Exception as e:
         print(f"WARNING: Turn 3 (Slack alert) failed: {e}")
 
-    return analysis
+    return analysis + safety_text

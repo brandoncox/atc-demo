@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { getShifts, analyzeTranscript, deleteShift } from "../api";
 
 function StatusBadge({ status }) {
@@ -188,7 +188,9 @@ export default function ShiftList() {
                       disabled={!shift.shift_id}
                     />
                   </td>
-                  <td style={{ fontFamily: "monospace", fontSize: 12 }}>{shift.shift_id || "—"}</td>
+                  <td style={{ fontFamily: "monospace", fontSize: 12 }}>
+                    {shift.shift_id ? <Link to={`/shift/${shift.shift_id}`}>{shift.shift_id}</Link> : "—"}
+                  </td>
                   <td>{shift.controller_id || "—"}</td>
                   <td>{shift.facility || "—"}</td>
                   <td>{shift.position || "—"}</td>

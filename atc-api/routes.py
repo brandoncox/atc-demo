@@ -3,7 +3,7 @@ import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
-from fastapi import APIRouter, File, Form, HTTPException, Request, UploadFile
+from fastapi import APIRouter, BackgroundTasks, File, Form, HTTPException, Request, UploadFile
 from openai import OpenAI, APIConnectionError, APIStatusError
 from pymongo.errors import DuplicateKeyError, PyMongoError
 
@@ -14,9 +14,10 @@ from config import (
     WHISPER_MODEL,
     GRANITE_BASE_URL,
     DEFAULT_QUERY_TEMPLATE,
+    FAA_AIM_URLS,
 )
 from models import AnalysisResponse, TranscriptRequest
-from rag import clean_text, run_rag_query
+from rag import clean_text, ingest_urls, run_rag_query
 
 router = APIRouter()
 
@@ -232,6 +233,31 @@ async def get_shifts(
 
 
 # ---------------------------------------------------------------------------
+# RAG ingestion
+# ---------------------------------------------------------------------------
+
+
+@router.post("/ingest")
+async def trigger_ingest(request: Request, background_tasks: BackgroundTasks):
+    if not request.app.state.model:
+        raise HTTPException(
+            status_code=503,
+            detail="LlamaStack model not initialized. Check LlamaStack connectivity and restart the pod.",
+        )
+
+    async def _run_ingest():
+        try:
+            vector_store_id = await asyncio.to_thread(ingest_urls, llama_client, FAA_AIM_URLS)
+            request.app.state.vector_store_id = vector_store_id
+            print(f"[ingest] Vector store ready: {vector_store_id}")
+        except Exception as e:
+            print(f"[ingest] Failed: {e}")
+
+    background_tasks.add_task(_run_ingest)
+    return {"detail": "Ingestion started. RAG will be available once complete."}
+
+
+# ---------------------------------------------------------------------------
 # Shift analysis
 # ---------------------------------------------------------------------------
 
@@ -260,7 +286,7 @@ async def analyze_transcript(req: TranscriptRequest, request: Request):
     if not model or not vector_store_id:
         raise HTTPException(
             status_code=503,
-            detail="RAG backend not initialized. Check LlamaStack and Milvus connectivity and restart the pod.",
+            detail="RAG backend not initialized. Call POST /ingest to load FAA documents.",
         )
 
     try:
